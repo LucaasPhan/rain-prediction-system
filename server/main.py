@@ -1,23 +1,21 @@
 import joblib 
-from sklearn.preprocessing import StandardScaler 
 
 def main():
     # load the model 
-    loaded_model = joblib.load("./server/rain_prediction.pkl")
+    loaded_model, loaded_scaler = joblib.load("./server/rain_prediction.pkl")
     print("Model loaded successfully")
     print("-"*25)
 
     ###
-    features = ["Temperature (C)", "Humidity (%)", "Wind Speed (km/h)", "Wind Direction (°)", "Cloud Cover (%)", "Atmospheric Pressure (hPa)"]
+    features = ["Temperature Min (C)", "Temperature Max (C)", "Wind (Km/h)", "Humidity (%)", "Atmospheric Pressure (hPa)"]
     data = []
-    print("Enter the data: (Temperature, humidity, wind speed, wind direction, cloud cover, atmospheric pressure)")
+    print("Enter the data: (Temperature min, Temperature max, wind speed, humidity, atmospheric pressure)")
     for feature in features:
         data.append(float(input(f"{feature}:\n")))
     
     ### send data to the model 
-    # standardize data 
-    scaler = StandardScaler()
-    standardized_data = scaler.fit_transform([data])
+    # Standardize data 
+    standardized_data = loaded_scaler.transform([data])
 
     prediction = loaded_model.predict(standardized_data)
     confidence = loaded_model.predict_proba(standardized_data)[:, 1]
