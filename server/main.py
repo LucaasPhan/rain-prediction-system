@@ -2,7 +2,7 @@ import joblib
 
 def main():
     # load the model 
-    loaded_model, loaded_scaler = joblib.load("./server/rain_prediction.pkl")
+    loaded_pipeline = joblib.load("./server/rain_prediction.pkl")
     print("Model loaded successfully")
     print("-"*25)
 
@@ -14,15 +14,17 @@ def main():
         data.append(float(input(f"{feature}:\n")))
     
     ### send data to the model 
-    # Standardize data 
-    standardized_data = loaded_scaler.transform([data])
+    # Predict class probabilities
+    proba = loaded_pipeline.predict_proba(data)
 
-    prediction = loaded_model.predict(standardized_data)
-    confidence = loaded_model.predict_proba(standardized_data)[:, 1]
+    # Predicted class
+    y_pred = loaded_pipeline.predict(data)
 
-    # output
-    print("-"*25)
-    print(f"Rain Prediction:\nPrediction: {'Yes' if prediction[0] == 1 else 'No'}\nConfidence: {'{:0.2f}%'.format(confidence[0] * 100)}")
+    # Confidence of predicted class
+    confidence = proba.max(axis=1)
+
+    for i in range(10):
+        print(f"Prediction: {"Yes" if y_pred[i] == 1 else "No"} - Confidence: {confidence[i]:.2f}")
 
 if __name__ == "__main__":
     main()
